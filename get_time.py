@@ -1,4 +1,3 @@
-from data_tools import transpose
 import menu
 from datetime import datetime
 from datetime import time
@@ -12,11 +11,11 @@ def get_weekdays():
 
 def time_range():
   '''Input a range of hours defined by a start and end hour'''
-  start = menu.select_integer("starting hour (inclusive)", 0, 23)
-  end = 0
-  
+  start = get_specific_time("starting time (inclusive)")
+
+  end = time(hour=0)
   while end <= start:
-    end = menu.select_integer("ending hour (exclusive)", start + 1, 24)
+    end = get_specific_time("ending time (exclusive)")
   return (start, end)
 
 def equal_times(t1, t2):
@@ -45,8 +44,9 @@ def in_range(dt, weekdays, time_range, with_minute=False):
       return True
   return False
 
-def get_specific_time():
+def get_specific_time(msg):
   '''returns hour and 15 minute interval'''
+  print(msg)
   h = menu.select_integer("hour", 0, 23)
   minutes = [str(h) + ":" + m for m in ["00", "15", "30", "45"]]
   m = menu.select_element("minute", minutes, True) - 1

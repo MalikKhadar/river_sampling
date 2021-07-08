@@ -90,16 +90,11 @@ def calculate_analysis(p, ap, site, data):
 def analyze_setup(analysis_params = 0):
   '''run the generate_maap function for each parameter in a site's data'''
   ap = analysis_params  #define shorthand
-  choose_site_params = True
   if not ap:
     ap = data_tools.Analysis_Params()
 
-  for site in ap.site:
+  for site in ap.sites:
     data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
-
-    if choose_site_params:
-      ap.choose_site_params(data[0])
-      choose_site_params = False
     
     print("~Analyzing " + site + "~\n")
 

@@ -19,13 +19,3 @@ class Time_Model(model.Model):
         new_samples.append(sample)
 
     self.samples = new_samples
-
-def choose_model():
-  '''user may select a model'''
-  options_dict = {
-    "None": Base_Model, 
-    "Time": Time_Model
-  }
-  options = list(options_dict.keys())
-  choice = menu.select_element("Sampling strategy type", options)
-  return options_dict[choice]

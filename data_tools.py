@@ -51,15 +51,29 @@ class Analysis_Params:
   '''set of parameters for running sample_analysis'''
   def __init__(self):
     #select a site
-    self.site = menu.select_site(single=False)
+    self.sites = menu.select_site(single=False)
       
     #select num of iterations and time range
     self.iterations = menu.select_integer("Number of iterations")
     self.time_range = get_time.select_timerange()
-    self.site_params = []
-    self.strategy = 0
+
+    param_options = []
+    #aggregate site params from all sites
+    for site in self.sites:
+      headers = data_in_time_range(site, just_headers=True)
+      #skip the datetime column
+      param_options.append(headers[1:])
+      #TODO: USE ABBREV TO CONDENSE OPTIONS
+    self.site_params = menu.multiselect(param_options, "parameter", return_names=True)
     
-  def choose_site_params(self, headers):
-    self.site_params = menu.multiselect(headers[1:], "parameter", return_names=True)
-    self.strategy = sampling_strategies.choose_model()
-    return self.site_params
+    self.strategy = self.choose_model()
+
+  def choose_model(self):
+    '''user may select a model'''
+    options_dict = {
+      "None": sampling_strategies.Base_Model, 
+      "Time": sampling_strategies.Time_Model
+    }
+    options = list(options_dict.keys())
+    choice = menu.select_element("Sampling strategy type", options)
+    self.strategy = options_dict[choice]()

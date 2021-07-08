@@ -76,7 +76,7 @@ def calculate_load(data, p):
 	'''Calculates load of given parameter from data'''
 	p_name = data[0][p]
 	discharge_index = streamflow_index(data[0]) #need to know which column holds the discharges
-	scalar = 900
+	scalar = 900 * 28.317
 	is_discharge = False
 	annual_load = 0
 
