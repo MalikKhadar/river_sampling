@@ -60,13 +60,15 @@ class Analysis_Params:
     param_options = []
     #aggregate site params from all sites
     for site in self.sites:
-      headers = data_in_time_range(site, just_headers=True)
+      headers = data_in_time_range("site_data/" + site, just_headers=True)
       #skip the datetime column
-      param_options.append(headers[1:])
+      param_options.extend(headers[1:])
       #TODO: USE ABBREV TO CONDENSE OPTIONS
+    param_options = list(set(param_options))  #remove duplicates
     self.site_params = menu.multiselect(param_options, "parameter", return_names=True)
     
-    self.strategy = self.choose_model()
+    self.cp = sampling_strategies.Cull_Params()
+    self.cp.name = self.choose_model()
 
   def choose_model(self):
     '''user may select a model'''
@@ -76,4 +78,5 @@ class Analysis_Params:
     }
     options = list(options_dict.keys())
     choice = menu.select_element("Sampling strategy type", options)
-    self.strategy = options_dict[choice]()
+    self.strategy = options_dict[choice]
+    return choice

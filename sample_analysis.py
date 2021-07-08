@@ -32,8 +32,9 @@ def write_analysis(p, ap, site, data, m):
   with open("summaries/model_summaries.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile) 
     for s in range(len(settings.sample_sizes)):
-      head_e = head + ["INSERT SAMPLING STRATEGY", ap.iterations, settings.sample_sizes[s], "perc culled", np.mean(m.val_m), np.std(m.val_m)]
+      head_e = head + [ap.cp.name, ap.iterations, settings.sample_sizes[s], "perc culled", np.mean(m.val_m), np.std(m.val_m)]
       writer.writerow(head_e + val_ls_t[s] + [np.mean(m.abs_m), np.std(m.abs_m)] + abs_ls_t[s] + [np.mean(m.rel_m), np.std(m.rel_m)] + rel_ls_t[s] + abs_sd_t[s] + rel_sd_t[s])
+  print("Wrote model data to summaries/model_summaries.csv")
 
   with open("summaries/site_summaries.csv", "a", newline='') as f:
     w = csv.writer(f)
@@ -41,13 +42,14 @@ def write_analysis(p, ap, site, data, m):
     observation_section = [m.potential_observations, m.actual_observations, m.potential_observations - m.actual_observations]
     r = head + observation_section + ["USGS", m.actual.mean] + list(m.actual.percentiles) + [m.actual.sd] + [annual_load]
     w.writerow(r)
+  print("Wrote site data to summaries/site_summaries.csv")
 
 def calculate_analysis(p, ap, site, data):
-  m = ap.strategy(data[1:], ap.iterations, p)
+  m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
   p_name = abbreviations.shorten(data[0][p])
-  print("Analyzing " + p_name)
   
   empty_check = m.generate_maap()
+  print("Analyzing " + p_name)
 
   if empty_check == True:
     print ("No samples were found in this timerange for", data[0][p])
@@ -101,4 +103,4 @@ def analyze_setup(analysis_params = 0):
     for p in ap.site_params:
       header = data[0]
       if p in header:
-        calculate_analysis(header.index(p), ap, site, data)  #account for datetime column
+        calculate_analysis(header.index(p), ap, site, data)
