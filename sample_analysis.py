@@ -98,7 +98,7 @@ def analyze_setup(analysis_params = 0):
   for site in ap.sites:
     data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
     
-    print("~Analyzing " + site + "~\n")
+    print("\n~Analyzing " + site + "~")
 
     for p in ap.site_params:
       header = data[0]
