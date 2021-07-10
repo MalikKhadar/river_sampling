@@ -44,7 +44,7 @@ def in_range(dt, weekdays, time_range, with_minute=False):
       return True
   return False
 
-def get_specific_time(msg):
+def get_specific_time(msg="Entering specific time of day"):
   '''returns hour and 15 minute interval'''
   print(msg)
   h = menu.select_integer("hour", 0, 23)

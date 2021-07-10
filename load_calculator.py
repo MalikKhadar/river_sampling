@@ -19,7 +19,9 @@ def empty_date_filler(prev, cur, discharge, writer):
 	prev = datetime.datetime.fromisoformat(prev)
 	cur = datetime.datetime.fromisoformat(cur)
 	days_difference = (cur - prev).days
-	d=0
+	d=1
+	if days_difference > 1:
+		print("empty period of", days_difference-1, "days detected")
 	while d < days_difference:
 		new_date = prev + datetime.timedelta(days=d)
 		new_date = new_date.isoformat()	#convert to string
@@ -49,9 +51,10 @@ def discharge_record():
 		#locate streamflow/discharge index in header
 		i = streamflow_index(data[0])
 		i_name = data[0][i]
+		data
 		#the datetime info is in the first column
 		for row in csvreader:
-			#make sure there's discharge val\
+			#make sure there's discharge val
 			t = datetime.datetime.fromisoformat(row[0]).time()
 			if row[i] != "" and get_time.equal_times(t, specific_time):
 				data.append([row[0], row[i]])
