@@ -1,4 +1,5 @@
 import csv
+import data_tools
 import datetime
 import get_time
 import menu
@@ -36,28 +37,24 @@ def discharge_record():
 	if site == "Exit":
 		return
 	
+	time_range = get_time.select_timerange()
 	specific_time = None
 	if not menu.select_element("Use specific time of day?", ["y","n"], True) - 1:
 		specific_time = get_time.get_specific_time()
 	empty_date_msg = "whether to fill empty days with 0 (for EGRET compatibility)"
 	empty_date_fill = menu.select_element(empty_date_msg, ["y", "n"], True) - 2
 
-	data = []
-	i_name = ""
-	
-	with open("site_data/" + site, 'r') as csvfile: 
-		csvreader = csv.reader(csvfile) 
-		data.append(next(csvreader))
-		#locate streamflow/discharge index in header
-		i = streamflow_index(data[0])
-		i_name = data[0][i]
-		data
-		#the datetime info is in the first column
-		for row in csvreader:
-			#make sure there's discharge val
-			t = datetime.datetime.fromisoformat(row[0]).time()
-			if row[i] != "" and get_time.equal_times(t, specific_time):
-				data.append([row[0], row[i]])
+	path = "site_data/" + site
+	data = data_tools.data_in_time_range(path, time_range)
+	i = streamflow_index(data[0])
+	i_name = data[0][i]
+
+	new_data = [[data[0][0], data[0][i]]]
+	for row in data[1:]:
+		t = datetime.datetime.fromisoformat(row[0]).time()
+		if row[i] != "" and get_time.equal_times(t, specific_time):
+			new_data.append([row[0], row[i]])
+	data = new_data
 
 	site = site.split(".")[0]   #remove type extension
 	filepath = "discharge_records/" + site + "_discharge.csv"
