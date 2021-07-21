@@ -47,6 +47,15 @@ def transpose(m):
   '''returns transpose of 2d list'''
   return [[m[j][i] for j in range(len(m))] for i in range(len(m[0]))]
 
+def run_count(f, run_count_col):
+  '''number of current run from file'''
+  with open(f, 'r') as csvfile:
+    csvreader = csv.reader(csvfile)
+    if len(csvreader) < 2:  #just headers (or nothing)
+      return 0
+    #return incrememnt of final val in run count col
+    return int(csvreader[-1][run_count_col]) + 1
+
 class Analysis_Params:
   '''set of parameters for running sample_analysis'''
   def __init__(self):
