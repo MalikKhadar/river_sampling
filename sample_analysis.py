@@ -21,7 +21,7 @@ def write_analysis(p, ap, site, data, m):
   '''write data to the summaries files'''
   annual_load = load_calculator.calculate_load(data, p)
   dt_info = [ap.time_range[0].date(), ap.time_range[0].time(), ap.time_range[1].date(), ap.time_range[1].time()]
-  head = [data_tools.run_count("summaries/model_summaries.csv", 0), p, datetime.now(), site.split(".")[0], data[0][p]] + dt_info
+  head = [data_tools.run_count("summaries/site_summaries.csv", 0), p, datetime.now(), site.split(".")[0], data[0][p]] + dt_info
 
   val_ls_t = data_tools.transpose(m.val_ls)
   abs_ls_t = data_tools.transpose(m.abs_ls)
