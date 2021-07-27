@@ -149,3 +149,11 @@ def select_timerange():
     print("Select an end date/time that's greater than " + str(start_datetime))
     end_datetime = select_datetime("Selecting end date/time")
   return [start_datetime, end_datetime]
+
+def add_years(d, years):
+  '''adds num_years to datetime object'''
+  try:
+    return d.replace(year = d.year + years)
+  except ValueError:
+    #exception for leap years, use following day
+    return d + (datetime.date(d.year + years, 1, 1) - datetime.date(d.year, 1, 1))

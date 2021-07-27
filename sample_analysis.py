@@ -2,6 +2,7 @@ import abbreviations
 import csv
 import data_tools
 from datetime import datetime
+import get_time
 import load_calculator
 import numpy as np
 from pathlib import Path
@@ -45,15 +46,26 @@ def write_analysis(p, ap, site, data, m):
     w.writerow(r)
   print("Wrote site data to summaries/site_summaries.csv")
 
-def calculate_analysis(p, ap, site, data):
+def calculate_analysis(p, ap, site):
+  data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
   m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
   p_name = abbreviations.shorten(data[0][p])
   
   empty_check = m.generate_maap()
   print("Analyzing " + p_name)
 
-  if empty_check == True:
-    print ("No samples were found in this timerange for", data[0][p])
+  while empty_check == True:
+    print("No samples were found in this timerange for", data[0][p])
+    #check the next year
+    ap.time_range[0] = get_time.add_years(ap.time_range[0], 1)
+    ap.time_range[1] = get_time.add_years(ap.time_range[1], 1)
+    if ap.time_range[0].date() > datetime.now().date():
+      print("No samples were found in the site data file")
+      return
+    print("Using next year")
+    data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
+    m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
+    empty_check = m.generate_maap()
   else:
     site_name = ''.join(site.split(".")[:-1])    #remove .csv text
     path_1 = 'maap_graphs/' + site_name + '/' 
@@ -96,12 +108,10 @@ def analyze_setup(analysis_params = 0):
   if not ap:
     ap = data_tools.Analysis_Params()
 
-  for site in ap.sites:
-    data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
-    
+  for site in ap.sites:    
     print("\n~Analyzing " + site + "~")
 
     for p in ap.site_params:
-      header = data[0]
-      if p in header:
-        calculate_analysis(header.index(p), ap, site, data)
+      headers = data_tools.data_in_time_range("site_data/"+site, just_headers=True)
+      if p in headers:
+        calculate_analysis(headers.index(p), ap, site)
