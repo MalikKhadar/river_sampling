@@ -15,7 +15,7 @@ def time_range():
 
   end = time(hour=0)
   while end <= start:
-    end = get_specific_time("ending time (exclusive)")
+    end = get_specific_time("ending time (exclusive), greater than starting time")
   return (start, end)
 
 def equal_times(t1, t2):
@@ -92,7 +92,7 @@ def choose_month(year):
   month_dict["Start of year"] = datetime(year, 1, 1)
   month_dict["End of water year"] = datetime(year, 9, 30)
   month_dict["Start of water year"] = datetime(year, 10, 1)
-  month_dict["End of year"] = datetime(year, 12, 31)
+  month_dict["End of year"] = datetime(year, 12, 31, 11, 45)
   
   cur_dt = datetime.today()   #only present option if it's not in future
   options = [m for (m,d) in month_dict.items() if cur_dt > d]

@@ -51,7 +51,7 @@ def select_integer(name, lower=0, upper=0, as_int=True):
   
   while True:
     message = ":\t"
-    #If bounds weren't specified, don't enforce them
+    #If bounds were specified enforce them
     if not (lower == 0 and upper == 0):
       message = " between " + str(lower) + " and " + str(upper) + ":\t"
     choice = input("Select " + name + message).split(" ")

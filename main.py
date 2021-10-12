@@ -8,6 +8,14 @@ import settings
 import get_time
 import menu
 
+import layer_interface
+import data_tools
+
+tr = get_time.select_timerange()
+data = data_tools.data_in_time_range("site_data/03346500.csv", tr)
+LI = layer_interface.Layer_Interface(data)
+LI.main_select()
+
 #print(numpy.percentile([1,12,3,5,31], settings.percentile_grain))
 
 #print(get_time.select_datetime("make pasta"))
