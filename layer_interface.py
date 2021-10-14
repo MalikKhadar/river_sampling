@@ -13,7 +13,8 @@ class Layer_Interface:
             if choice == "Add filter":
                 self.filter_select()
             elif choice == "Add layer":
-                self.strat.add_layer()
+                new_layer = layer.Layer()
+                self.strat.add_layer(new_layer)
             else:
                 return
             self.strat.print()
@@ -44,7 +45,7 @@ class Layer_Interface:
 
 
     def datetime_mumbojumbo(self):
-        dt_tier = menu.select_element("tier", layer.tier.keys())
+        dt_tier = menu.select_element("tier", list(layer.tier.keys()))
         if dt_tier != "Custom DateTime":
             max_val = layer.tier[dt_tier]
             start = menu.select_integer("Start " + dt_tier, 0, max_val)

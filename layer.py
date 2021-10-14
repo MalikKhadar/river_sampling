@@ -12,14 +12,6 @@ class Span:
             return True
         return False
 
-class Filter:
-    def __intit__(self):
-        pass
-    def test(self, row):
-        pass
-    def print(self):
-        pass
-
 tier = {
     "Year": 0,
     "Season": 4,
@@ -30,7 +22,7 @@ tier = {
     "Specific DateTime": 0
 }
 
-class Time_Filter(Filter):
+class Time_Filter:
     def __init__(self, tier, span):
         self.tier = tier
         self.span = span
@@ -59,7 +51,7 @@ class Time_Filter(Filter):
         p += str(self.span.max)
         print(p)
 
-class Val_Filter(Filter):
+class Val_Filter:
     def __init__(self, col, span):
         self.col = col
         self.span = span
@@ -74,7 +66,7 @@ class Val_Filter(Filter):
         p += str(self.span.max)
         print(p)
 
-class Perc_Filter(Filter):
+class Perc_Filter:
     def __init__(self, col, span, data):
         self.col = col
         self.span = span
@@ -92,8 +84,11 @@ class Perc_Filter(Filter):
         print(p)
 
 class Layer:
-    def __init__(self, filters=[]):
-        self.filters = filters
+    def __init__(self, filters=None):
+        if filters == None:
+            filters = []
+        else:
+            self.filters = filters
 
     def add_filter(self, filter):
         self.filters.append(filter)
@@ -112,8 +107,11 @@ class Layer:
             filter.print()
 
 class Strategy:
-    def __init__(self, layers=[Layer()]):
-        self.layers = layers
+    def __init__(self, layers=None):
+        if layers == None:
+            layers = [Layer()]
+        else:
+            self.layers = layers
 
     def add_layer(self, layer):
         self.layers.append(layer)
