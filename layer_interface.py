@@ -7,6 +7,9 @@ class Layer_Interface:
         self.data = data
         self.strat = layer.Strategy()
     
+    def apply(self):
+        self.strat.apply(self.data)
+    
     def main_select(self):
         choice = menu.select_element("Strategy Component", ["Add filter", "Add layer", "Finish"])
         while choice != "Finish":
@@ -17,12 +20,12 @@ class Layer_Interface:
                 self.strat.add_layer(new_layer)
             else:
                 return
-            self.strat.print()
+            self.strat.print(self.data[0]) #pass in the headers
             choice = menu.select_element("Strategy Component", ["Add filter", "Add layer", "Finish"])
 
     def filter_select(self):
         #select a parameter from the headers
-        param = menu.select_element("Parameter", self.data[0])
+        param = menu.select_element("Parameter", self.data[0], return_index=True)
         filter = 0
         #select a parameter
         #if the parameter is time, select tier and then span or 2 specific dates for span

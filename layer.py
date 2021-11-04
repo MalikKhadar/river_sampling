@@ -8,7 +8,7 @@ class Span:
         self.max = max
     
     def contains(self, val):
-        if val >= self.min and val < self.max:
+        if float(val) >= self.min and float(val) < self.max:
             return True
         return False
 
@@ -24,6 +24,7 @@ tier = {
 
 class Time_Filter:
     def __init__(self, tier, span):
+        self.col = 0    #dt column is always first
         self.tier = tier
         self.span = span
     
@@ -59,10 +60,10 @@ class Val_Filter:
     def test(self, row):
         return self.span.contains(row[self.col])
 
-    def print(self):
+    def print(self, headers):
         p = "Value:\t"
         p += str(self.span.min) + " <= "
-        p += self.col + " < "
+        p += headers[self.col] + " < "
         p += str(self.span.max)
         print(p)
 
@@ -76,17 +77,17 @@ class Perc_Filter:
         perc = stats.percentileofscore(self.data[:,self.col], row[self.col])
         return self.span.contains(perc)
 
-    def print(self):
+    def print(self, headers):
         p = "Percentile:\t"
         p += str(self.span.min) + "th <= "
-        p += self.col + " < "
+        p += headers[self.col] + " < "
         p += str(self.span.max) + "th"
         print(p)
 
 class Layer:
     def __init__(self, filters=None):
         if filters == None:
-            filters = []
+            self.filters = []
         else:
             self.filters = filters
 
@@ -102,14 +103,14 @@ class Layer:
                     break
         return filtered
 
-    def print(self):
+    def print(self, headers):
         for filter in self.filters:
-            filter.print()
+            filter.print(headers)
 
 class Strategy:
     def __init__(self, layers=None):
         if layers == None:
-            layers = [Layer()]
+            self.layers = [Layer()]
         else:
             self.layers = layers
 
@@ -120,10 +121,18 @@ class Strategy:
         for layer in self.layers:
             data = layer.apply(data)
 
-    def print(self):
+    def get_dependencies(self):
+        d = []
+        for l in self.layers:
+            for f in l.filters:
+                if f.col not in d:
+                    d.append(f.col)
+        return d
+
+    def print(self, headers):
         for l in range(len(self.layers)):
             print("\tLayer " + str(l))
-            self.layers[l].print()
+            self.layers[l].print(headers)
 
 '''
 d = [["day", "temp", "speed"], ["1990-10-01T01:15:00.000-04:00",2,3], ["2012-03-07T00:00:00.000-05:00",5,6], ["2013-06-21T23:30:00.000-04:00",8,9]]

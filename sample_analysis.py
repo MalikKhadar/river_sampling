@@ -7,6 +7,7 @@ import load_calculator
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
+import model
 import sampling_strategies
 import settings
 
@@ -18,11 +19,11 @@ def analyze():
     print("Permission error. Analysis aborted")
     print("Site and model summary files must be closed in other applications")
 
-def write_analysis(p, ap, site, data, m):
+def write_analysis(p, ap, m):
   '''write data to the summaries files'''
-  annual_load = load_calculator.calculate_load(data, p)
+  annual_load = load_calculator.calculate_load(ap.data, p)
   dt_info = [ap.time_range[0].date(), ap.time_range[0].time(), ap.time_range[1].date(), ap.time_range[1].time()]
-  head = [data_tools.run_count("summaries/site_summaries.csv", 0), p, datetime.now(), site.split(".")[0], data[0][p]] + dt_info
+  head = [data_tools.run_count("summaries/site_summaries.csv", 0), p, datetime.now(), ap.site.split(".")[0], ap.data[0][p]] + dt_info
 
   val_ls_t = data_tools.transpose(m.val_ls)
   abs_ls_t = data_tools.transpose(m.abs_ls)
@@ -34,7 +35,7 @@ def write_analysis(p, ap, site, data, m):
   with open("summaries/model_summaries.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile) 
     for s in range(len(settings.sample_sizes)):
-      head_e = head + [ap.cp.name, ap.iterations, settings.sample_sizes[s], "perc culled", np.mean(m.val_m), np.std(m.val_m)]
+      head_e = head + ["COLUMN IN CONSTRUCTION", ap.iterations, settings.sample_sizes[s], "perc culled", np.mean(m.val_m), np.std(m.val_m)]
       writer.writerow(head_e + val_ls_t[s] + [np.mean(m.abs_m), np.std(m.abs_m)] + abs_ls_t[s] + [np.mean(m.rel_m), np.std(m.rel_m)] + rel_ls_t[s] + abs_sd_t[s] + rel_sd_t[s])
   print("Wrote model data to summaries/model_summaries.csv")
 
@@ -46,28 +47,27 @@ def write_analysis(p, ap, site, data, m):
     w.writerow(r)
   print("Wrote site data to summaries/site_summaries.csv")
 
-def calculate_analysis(p, ap, site):
-  data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
-  m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
-  p_name = abbreviations.shorten(data[0][p])
+def calculate_analysis(p, ap):
+  m = model.Model(p, ap)
+  p_name = abbreviations.shorten(ap.data[0][p])
   
   empty_check = m.generate_maap()
   print("Analyzing " + p_name)
 
   while empty_check == True:
-    print("No samples were found in this timerange for", data[0][p])
-    #check the next year
-    ap.time_range[0] = get_time.add_years(ap.time_range[0], 1)
-    ap.time_range[1] = get_time.add_years(ap.time_range[1], 1)
-    if ap.time_range[0].date() > datetime.now().date():
-      print("No samples were found in the site data file")
-      return
-    print("Using next year")
-    data = data_tools.data_in_time_range("site_data/"+site, ap.time_range)
-    m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
-    empty_check = m.generate_maap()
+    print("No samples were found in this timerange for", ap.data[0][p])
+    # #check the next year
+    # ap.time_range[0] = get_time.add_years(ap.time_range[0], 1)
+    # ap.time_range[1] = get_time.add_years(ap.time_range[1], 1)
+    # if ap.time_range[0].date() > datetime.now().date():
+    #   print("No samples were found in the site data file")
+    #   return
+    # print("Using next year")
+    # data = data_tools.data_in_time_range("site_data/"+ap.site, ap.time_range)
+    # m = ap.strategy(data[1:], ap.iterations, p, ap.cp)
+    # empty_check = m.generate_maap()
   else:
-    site_name = ''.join(site.split(".")[:-1])    #remove .csv text
+    site_name = ''.join(ap.site.split(".")[:-1])    #remove .csv text
     path_1 = 'maap_graphs/' + site_name + '/' 
     
     title = str(ap.time_range[0]) + " through " + str(ap.time_range[1])
@@ -98,7 +98,7 @@ def calculate_analysis(p, ap, site):
     plt.savefig(save_dest + 'rel.png')
     plt.close()
 
-    write_analysis(p, ap, site, data, m)
+    write_analysis(p, ap, m)
 
     del m
 
@@ -108,10 +108,7 @@ def analyze_setup(analysis_params = 0):
   if not ap:
     ap = data_tools.Analysis_Params()
 
-  for site in ap.sites:    
-    print("\n~Analyzing " + site + "~")
-
-    for p in ap.site_params:
-      headers = data_tools.data_in_time_range("site_data/"+site, just_headers=True)
-      if p in headers:
-        calculate_analysis(headers.index(p), ap, site)
+  headers = ap.data[0]
+  # skip the datetime column
+  for p in range(1, len(headers)):
+    calculate_analysis(p, ap)

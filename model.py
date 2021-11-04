@@ -12,11 +12,12 @@ class Vert:
 
 class Model:
   '''Generates iterations amount of models from a sample space for a given parameter index'''
-  def __init__(self, samples, iterations, parameter):
-    self.samples = samples
+  def __init__(self, parameter, ap):
+    # self.samples = samples
     self.sample_size = 0
-    self.iterations = iterations
+    # self.iterations = iterations
     self.parameter = parameter
+    self.ap = ap
     self.verts = []
     self.potential_observations = 0
     self.actual_observations = 0
@@ -33,18 +34,25 @@ class Model:
 
   def cull(self):
     '''based on the sampling strategy, remove samples from the model's potential sample space'''
+    self.ap.strat.data = self.samples
+    self.ap.strat.apply()
+    self.samples = [float(s[self.parameter]) for s in self.samples]
     pass
 
-  def clean(self):
+  def clean(self, dependencies):
     '''get rid of samples that don't have a value in the parameter index'''
     s = []
     for sample in self.samples:
-      if sample[self.parameter] != "":          #if there's something in the field
-        val = float(sample[self.parameter])
-        s.append(val)
+      has_dependencies = True
+      for d in dependencies:
+        if sample[d] == "":
+          has_dependencies = False
+          break
+      if has_dependencies:
+        s.append(sample)
         #keep track of how many potential vs actual observations are being used
         self.actual_observations += 1
-        self.model_mean += val
+        self.model_mean += float(sample[self.parameter])
       self.potential_observations += 1
     self.samples = s
   
@@ -79,7 +87,7 @@ class Model:
     relative_diffs = []
     model_vals = []
 
-    for _ in range(self.iterations):
+    for _ in range(self.ap.iterations):
       sub = self.subset()
       model_vals.append(sub)
       absolute_diffs.append(data_tools.Data([a - m for a, m in zip(actual.percentiles, sub.percentiles)])) #diffs between subset percentiles and actual percentiles
@@ -95,19 +103,22 @@ class Model:
   def generate_maap(self):
     '''run the iterate function for each sample size in settings.py. Returns 1 if no samples in range for param, 0 if success'''
     #generate Data from the original set of samples'''
-    original = self.samples
-    self.clean()
+    self.samples = self.ap.samples[:]
+    self.clean(dependencies=[self.parameter])
+    self.samples = [float(s[self.parameter]) for s in self.samples]
 
     if self.samples == []:
-      return 1
+      return 1  #return 1 as the empty check failed
     self.actual = data_tools.Data(self.samples, calc_sd=True)
 
     #prepare the culled sample space, record how many samples were lost during culling
-    self.samples = original
+    self.samples = self.ap.samples[:]
     num_culled = len(self.samples)
+    dependencies = dependencies=self.ap.strat.strat.get_dependencies()
+    dependencies.append(self.parameter)
+    self.clean(dependencies)
     self.cull()
     num_culled -= len(self.samples)
-    self.clean()
 
     if self.samples == []:
       print("No samples left after culling")

@@ -1,6 +1,7 @@
 import csv
 import datetime
 import get_time
+import layer_interface
 import menu
 import numpy as np
 import sampling_strategies
@@ -39,7 +40,9 @@ def data_in_time_range(file_location, time_range=0, just_headers=False):
     #the datetime info is in the first column
     for row in csvreader: 
       dt = datetime.datetime.fromisoformat(row[0])
-      if dt < time_range[1] and dt > time_range[0]:    #only use data within the timerange
+      if time_range == 0:
+        data.append(row)
+      elif dt < time_range[1] and dt > time_range[0]:    #only use data within the timerange
         data.append(row)  
     return data 
 
@@ -63,32 +66,29 @@ class Analysis_Params:
   '''set of parameters for running sample_analysis'''
   def __init__(self):
     #select a site
-    self.sites = menu.select_site(single=False)
+    self.site = menu.select_site()
       
     #select num of iterations and time range
     self.iterations = menu.select_integer("Number of iterations")
     self.time_range = get_time.select_timerange()
 
-    param_options = []
-    #aggregate site params from all sites
-    for site in self.sites:
-      headers = data_in_time_range("site_data/" + site, just_headers=True)
-      #skip the datetime column
-      param_options.extend(headers[1:])
-      #TODO: USE ABBREV TO CONDENSE OPTIONS
-    param_options = list(set(param_options))  #remove duplicates
-    self.site_params = menu.multiselect(param_options, "parameter", return_names=True)
+    self.data = data_in_time_range("site_data/" + self.site, self.time_range)
+    self.samples = self.data[1:]
+    # self.site_params = menu.multiselect(param_options, "parameter", return_names=True)
     
-    self.cp = sampling_strategies.Cull_Params()
-    self.cp.name = self.choose_model()
+    self.strat = layer_interface.Layer_Interface(self.data)
+    self.strat.main_select()
+    
+    # self.cp = sampling_strategies.Cull_Params()
+    # self.cp.name = self.choose_model()
 
-  def choose_model(self):
-    '''user may select a model'''
-    options_dict = {
-      "None": sampling_strategies.Base_Model, 
-      "Time": sampling_strategies.Time_Model
-    }
-    options = list(options_dict.keys())
-    choice = menu.select_element("Sampling strategy type", options)
-    self.strategy = options_dict[choice]
-    return choice
+  # def choose_model(self):
+  #   '''user may select a model'''
+  #   options_dict = {
+  #     "None": sampling_strategies.Base_Model, 
+  #     "Time": sampling_strategies.Time_Model
+  #   }
+  #   options = list(options_dict.keys())
+  #   choice = menu.select_element("Sampling strategy type", options)
+  #   self.strategy = options_dict[choice]
+  #   return choice
