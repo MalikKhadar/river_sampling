@@ -8,7 +8,6 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 import model
-import sampling_strategies
 import settings
 
 def analyze():
@@ -56,6 +55,7 @@ def calculate_analysis(p, ap):
 
   while empty_check == True:
     print("No samples were found in this timerange for", ap.data[0][p])
+    return
     # #check the next year
     # ap.time_range[0] = get_time.add_years(ap.time_range[0], 1)
     # ap.time_range[1] = get_time.add_years(ap.time_range[1], 1)

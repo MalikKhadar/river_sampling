@@ -4,7 +4,6 @@ import get_time
 import layer_interface
 import menu
 import numpy as np
-import sampling_strategies
 import settings
 
 def flatten(l):
